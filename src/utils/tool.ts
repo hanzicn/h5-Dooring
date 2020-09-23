@@ -1,3 +1,4 @@
+import { RefObject, useEffect, useLayoutEffect, useState } from 'react';
 import { RGBColor } from 'react-color';
 
 // 生成uuid
@@ -38,3 +39,28 @@ function rgba2Obj(rgba = '') {
 }
 
 export { uuid, rgba2Obj };
+
+export const isDev = process.env.NODE_ENV === 'development';
+
+export function useGetRect() {
+  const [rect, setRect] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    setRect({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
+  return rect;
+}
+
+export function useGetScrollBarWidth(ref: RefObject<HTMLElement>) {
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    if (ref.current) {
+      const diff = ref.current.offsetWidth - ref.current.clientWidth;
+      console.log(diff);
+      setWidth(diff);
+    }
+  }, [ref]);
+  return width;
+}

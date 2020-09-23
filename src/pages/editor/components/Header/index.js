@@ -6,13 +6,16 @@ import {
   DownloadOutlined,
   CopyOutlined,
   DeleteOutlined,
+  UndoOutlined,
+  RedoOutlined,
+  FileAddOutlined,
 } from '@ant-design/icons';
+import { history } from 'umi';
 import QRCode from 'qrcode.react';
 import { saveAs } from 'file-saver';
 import Zan from 'components/Zan';
 import req from '@/utils/req';
 import Code from '@/assets/code.png';
-
 import styles from './index.less';
 
 const { confirm } = Modal;
@@ -20,7 +23,7 @@ const { confirm } = Modal;
 const isDev = process.env.NODE_ENV === 'development';
 
 const HeaderComponent = memo(props => {
-  const { pointData, location, clearData } = props;
+  const { pointData, location, clearData, undohandler, redohandler } = props;
   const iptRef = useRef(null);
 
   const toPreview = () => {
@@ -96,17 +99,30 @@ const HeaderComponent = memo(props => {
     window.location.href = `/h5_plus/login?tid=${tid}`;
   };
 
+  const toBack = () => {
+    history.push('/');
+  };
+
+  const newPage = () => {
+    let prev = localStorage.getItem('myH5');
+    try {
+      localStorage.setItem('myH5', JSON.stringify(prev ? [...prev, pointData] : [pointData]));
+    } catch (err) {
+      console.error(err);
+    }
+    clearData();
+  };
+
   const savePreview = () => {
     const { tid } = props.location.query || '';
     req.post('/visible/preview', { tid, tpl: pointData });
   };
-
   const handleSaveCode = () => {};
 
   return (
     <div className={styles.header}>
       <div className={styles.logoArea}>
-        <div className={styles.backBtn} onClick={toLogin}>
+        <div className={styles.backBtn} onClick={toBack}>
           <ArrowLeftOutlined />
         </div>
         <div className={styles.logo}>Dooring</div>
@@ -140,6 +156,15 @@ const HeaderComponent = memo(props => {
         >
           <CopyOutlined />
         </Button>
+        <Button
+          type="link"
+          style={{ marginRight: '9px' }}
+          title="新建页面"
+          onClick={newPage}
+          disabled={!pointData.length}
+        >
+          <FileAddOutlined />
+        </Button>
         <Popover placement="bottom" title={null} content={content} trigger="click">
           <Button
             type="link"
@@ -158,6 +183,18 @@ const HeaderComponent = memo(props => {
           disabled={!pointData.length}
         >
           <DeleteOutlined />
+        </Button>
+        <Button
+          type="link"
+          style={{ marginRight: '9px' }}
+          title="撤销"
+          onClick={undohandler}
+          disabled={!pointData.length}
+        >
+          <UndoOutlined />
+        </Button>
+        <Button type="link" style={{ marginRight: '9px' }} title="重做" onClick={redohandler}>
+          <RedoOutlined />
         </Button>
         <Button type="link" onClick={toPreview} disabled={!pointData.length}>
           预览

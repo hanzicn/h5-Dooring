@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Slider, Result, Tabs, Alert } from 'antd';
 import {
   PieChartOutlined,
@@ -13,20 +13,24 @@ import SourceBox from './SourceBox';
 import TargetBox from './TargetBox';
 import Calibration from 'components/Calibration';
 import DynamicEngine from 'components/DynamicEngine';
-import FormEditor from 'components/FormEditor';
-import template from 'components/DynamicEngine/template';
-import mediaTpl from 'components/DynamicEngine/mediaTpl';
-import graphTpl from 'components/DynamicEngine/graphTpl';
-import schema from 'components/DynamicEngine/schema';
+import FormEditor from 'components/PanelComponents/FormEditor';
+import template from 'components/BasicShop/BasicComponents/template';
+import mediaTpl from 'components/BasicShop/MediaComponents/template';
+import graphTpl from 'components/BasicShop/VisualComponents/template';
+import schema from 'components/BasicShop/schema';
+import { ActionCreators } from 'redux-undo';
 
 import styles from './index.less';
 
 const { TabPane } = Tabs;
 
-const Container = memo(props => {
+const Container = props => {
   const [scaleNum, setScale] = useState(1);
 
-  const { pointData, curPoint, dispatch } = props;
+  const { pstate, dispatch } = props;
+
+  const pointData = pstate ? pstate.pointData : {};
+  const curPoint = pstate ? pstate.curPoint : {};
   // 指定画布的id
   let canvasId = 'js_canvas';
 
@@ -59,7 +63,6 @@ const Container = memo(props => {
       setScale(prev => (prev <= 0.5 ? 0.5 : prev - 0.1));
     }
   };
-
   const handleFormSave = data => {
     dispatch({
       type: 'editorModal/modPointData',
@@ -67,9 +70,9 @@ const Container = memo(props => {
     });
   };
 
-  const clearData = useCallback(() => {
+  const clearData = () => {
     dispatch({ type: 'editorModal/clearAll' });
-  }, []);
+  };
 
   const handleDel = id => {
     dispatch({
@@ -77,11 +80,17 @@ const Container = memo(props => {
       payload: { id },
     });
   };
-
+  const redohandler = () => {
+    dispatch(ActionCreators.redo());
+  };
+  const undohandler = () => {
+    dispatch(ActionCreators.undo());
+  };
   useEffect(() => {
     if (window.innerWidth < 1024) {
       props.history.push('/mobileTip');
-    }
+    } //待修改
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const allType = useMemo(() => {
@@ -100,7 +109,13 @@ const Container = memo(props => {
 
   return (
     <div className={styles.editorWrap}>
-      <HeaderComponent pointData={pointData} clearData={clearData} location={props.location} />
+      <HeaderComponent
+        redohandler={redohandler}
+        undohandler={undohandler}
+        pointData={pointData}
+        clearData={clearData}
+        location={props.location}
+      />
       <div className={styles.container}>
         <div className={styles.list}>
           <div className={styles.searchBar}>
@@ -109,8 +124,7 @@ const Container = memo(props => {
               message={
                 <TextLoop mask>
                   <div>Dooring升级啦！</div>
-                  <div>Dooring添加自动保存功能</div>
-                  <div>已有500+人使用</div>
+                  <div>已有1000+人使用</div>
                   <div>持续迭代中...</div>
                 </TextLoop>
               }
@@ -119,23 +133,40 @@ const Container = memo(props => {
           <div className={styles.componentList}>
             <Tabs defaultActiveKey="1">
               <TabPane tab={generateHeader('base', '基础组件')} key="1">
-                {template.map((value, i) => (
-                  <TargetBox item={value} key={i} canvasId={canvasId}>
-                    <DynamicEngine {...value} config={schema[value.type].config} isTpl={true} />
-                  </TargetBox>
-                ))}
+                {template.map((value, i) => {
+                  return (
+                    <TargetBox item={value} key={i} canvasId={canvasId}>
+                      <DynamicEngine
+                        {...value}
+                        config={schema[value.type].config}
+                        componentsType="base"
+                        isTpl={true}
+                      />
+                    </TargetBox>
+                  );
+                })}
               </TabPane>
               <TabPane tab={generateHeader('media', '媒体组件')} key="2">
                 {mediaTpl.map((value, i) => (
                   <TargetBox item={value} key={i} canvasId={canvasId}>
-                    <DynamicEngine {...value} config={schema[value.type].config} isTpl={true} />
+                    <DynamicEngine
+                      {...value}
+                      config={schema[value.type].config}
+                      componentsType="media"
+                      isTpl={true}
+                    />
                   </TargetBox>
                 ))}
               </TabPane>
               <TabPane tab={generateHeader('visible', '可视化组件')} key="3">
                 {graphTpl.map((value, i) => (
                   <TargetBox item={value} key={i} canvasId={canvasId}>
-                    <DynamicEngine {...value} config={schema[value.type].config} isTpl={true} />
+                    <DynamicEngine
+                      {...value}
+                      config={schema[value.type].config}
+                      componentsType="visible"
+                      isTpl={true}
+                    />
                   </TargetBox>
                 ))}
               </TabPane>
@@ -196,9 +227,8 @@ const Container = memo(props => {
       </div>
     </div>
   );
-});
+};
 
-export default connect(({ editorModal: { pointData, curPoint } }) => ({
-  pointData,
-  curPoint,
-}))(Container);
+export default connect(state => {
+  return { pstate: state.present.editorModal };
+})(Container);

@@ -7,8 +7,11 @@ import { connect } from 'dva';
 import DynamicEngine from 'components/DynamicEngine';
 import styles from './index.less';
 import { uuid } from '@/utils/tool';
+
 const SourceBox = memo(props => {
-  const { pointData, scaleNum, canvasId, allType, dispatch } = props;
+  const { pstate, scaleNum, canvasId, allType, dispatch } = props;
+
+  const pointData = pstate ? pstate.pointData : {};
   const [canvasRect, setCanvasRect] = useState([]);
   const [isShowTip, setIsShowTip] = useState(true);
   const [{ isOver }, drop] = useDrop({
@@ -77,7 +80,6 @@ const SourceBox = memo(props => {
       window.clearTimeout(timer);
     };
   }, []);
-
   const opacity = isOver ? 0.7 : 1;
   const backgroundColor = isOver ? 1 : 0.7;
   return (
@@ -122,7 +124,7 @@ const SourceBox = memo(props => {
                 className={styles.layout}
                 cols={24}
                 rowHeight={2}
-                width={canvasRect[0]}
+                width={canvasRect[0] || 0}
                 margin={[0, 0]}
                 onDragStop={dragStop}
                 onDragStart={onDragStart}
@@ -142,6 +144,4 @@ const SourceBox = memo(props => {
   );
 });
 
-export default connect(({ editorModal: { pointData } }) => ({
-  pointData,
-}))(SourceBox);
+export default connect(state => ({ pstate: state.present.editorModal }))(SourceBox);

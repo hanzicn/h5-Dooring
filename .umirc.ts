@@ -8,20 +8,31 @@ export default defineConfig({
   dva: {
     immer: true,
   },
+  devtool: 'source-map',
   antd: {},
-  title: '趣谈前端-h5-visible-tool',
+  title: '趣谈前端-h5-dooring',
   exportStatic: {},
   base: 'h5_plus',
   publicPath: '/h5_plus/',
   outputPath: '../server/static/h5_plus',
+
   routes: [
     {
+      exact: false,
       path: '/',
-      // component: '@/layouts',
+      component: '@/layouts/index',
       routes: [
+        {
+          path: '/',
+          component: '../pages/home',
+        },
         {
           path: '/editor',
           component: '../pages/editor',
+        },
+        {
+          path: '/ide',
+          component: '../pages/ide',
         },
         {
           path: '/login',
