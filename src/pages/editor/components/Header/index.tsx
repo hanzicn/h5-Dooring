@@ -1,5 +1,5 @@
 import React, { useRef, memo } from 'react';
-import { Button, Input, Popover, Modal } from 'antd';
+import { Button, Input, Popover, Modal, Switch } from 'antd';
 import {
   ArrowLeftOutlined,
   MobileOutlined,
@@ -22,9 +22,18 @@ const { confirm } = Modal;
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const HeaderComponent = memo(props => {
-  const { pointData, location, clearData, undohandler, redohandler } = props;
-  const iptRef = useRef(null);
+interface HeaderComponentProps {
+  pointData: any;
+  location: any;
+  clearData: any;
+  undohandler: any;
+  redohandler: any;
+  toggleCollapsed: any;
+}
+
+const HeaderComponent = memo((props: HeaderComponentProps) => {
+  const { pointData, location, clearData, undohandler, redohandler, toggleCollapsed } = props;
+  const iptRef = useRef<Input>(null);
 
   const toPreview = () => {
     localStorage.setItem('pointData', JSON.stringify(pointData));
@@ -33,7 +42,7 @@ const HeaderComponent = memo(props => {
       window.open(
         isDev
           ? `/preview?tid=${props.location.query.tid}`
-          : `http://io.nainor.com/h5_plus/preview?tid=${props.location.query.tid}`,
+          : `/preview?tid=${props.location.query.tid}`,
       );
     }, 600);
   };
@@ -41,9 +50,7 @@ const HeaderComponent = memo(props => {
   const content = () => {
     const { tid } = location.query || '';
     return (
-      <QRCode
-        value={`${window.location.protocol}//${window.location.host}/h5_plus/preview?tid=${tid}`}
-      />
+      <QRCode value={`${window.location.protocol}//${window.location.host}/preview?tid=${tid}`} />
     );
   };
 
@@ -65,7 +72,7 @@ const HeaderComponent = memo(props => {
       okText: '保存',
       cancelText: '取消',
       onOk() {
-        let name = iptRef.current.state.value;
+        let name = iptRef.current!.state.value;
         req.post('/visible/tpl/save', { name, tpl: pointData }).then(res => {
           console.log(res);
         });
@@ -106,7 +113,10 @@ const HeaderComponent = memo(props => {
   const newPage = () => {
     let prev = localStorage.getItem('myH5');
     try {
-      localStorage.setItem('myH5', JSON.stringify(prev ? [...prev, pointData] : [pointData]));
+      localStorage.setItem(
+        'myH5',
+        JSON.stringify(prev ? [...Array.from(prev), pointData] : [pointData]),
+      );
     } catch (err) {
       console.error(err);
     }
@@ -126,6 +136,7 @@ const HeaderComponent = memo(props => {
           <ArrowLeftOutlined />
         </div>
         <div className={styles.logo}>Dooring</div>
+        <Switch onChange={toggleCollapsed} style={{ marginLeft: '100px' }} />
       </div>
       <div className={styles.controlArea}>
         <Button type="primary" style={{ marginRight: '9px' }} onClick={useTemplate}>

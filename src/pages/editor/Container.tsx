@@ -5,6 +5,7 @@ import {
   ExpandOutlined,
   PlayCircleOutlined,
   HighlightOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import TextLoop from 'react-text-loop';
 import { connect } from 'dva';
@@ -12,23 +13,24 @@ import HeaderComponent from './components/Header';
 import SourceBox from './SourceBox';
 import TargetBox from './TargetBox';
 import Calibration from 'components/Calibration';
-import DynamicEngine from 'components/DynamicEngine';
+import DynamicEngine, { componentsType } from 'components/DynamicEngine';
 import FormEditor from 'components/PanelComponents/FormEditor';
 import template from 'components/BasicShop/BasicComponents/template';
 import mediaTpl from 'components/BasicShop/MediaComponents/template';
 import graphTpl from 'components/BasicShop/VisualComponents/template';
 import schema from 'components/BasicShop/schema';
 import { ActionCreators } from 'redux-undo';
-
+import { StateWithHistory } from 'redux-undo';
 import styles from './index.less';
+import { useGetBall } from 'react-draggable-ball';
 
 const { TabPane } = Tabs;
 
-const Container = props => {
+const Container = (props: { history?: any; location?: any; pstate?: any; dispatch?: any }) => {
   const [scaleNum, setScale] = useState(1);
+  const [collapsed, setCollapsed] = useState(false);
 
   const { pstate, dispatch } = props;
-
   const pointData = pstate ? pstate.pointData : {};
   const curPoint = pstate ? pstate.curPoint : {};
   // 指定画布的id
@@ -38,13 +40,17 @@ const Container = props => {
     setScale(1);
   };
 
+  const toggleCollapsed = (checked: boolean) => {
+    setCollapsed(checked);
+  };
+
   const CpIcon = {
     base: <HighlightOutlined />,
     media: <PlayCircleOutlined />,
     visible: <PieChartOutlined />,
   };
 
-  const generateHeader = (type, text) => {
+  const generateHeader = (type: componentsType, text: string) => {
     return (
       <div>
         {CpIcon[type]} {text}
@@ -52,18 +58,18 @@ const Container = props => {
     );
   };
 
-  const handleSliderChange = v => {
+  const handleSliderChange = (v: number) => {
     setScale(prev => (v >= 150 ? 1.5 : v / 100));
   };
 
-  const handleSlider = type => {
+  const handleSlider = (type: any) => {
     if (type) {
       setScale(prev => (prev >= 1.5 ? 1.5 : prev + 0.1));
     } else {
       setScale(prev => (prev <= 0.5 ? 0.5 : prev - 0.1));
     }
   };
-  const handleFormSave = data => {
+  const handleFormSave = (data: any) => {
     dispatch({
       type: 'editorModal/modPointData',
       payload: { ...curPoint, item: { ...curPoint.item, config: data } },
@@ -74,7 +80,7 @@ const Container = props => {
     dispatch({ type: 'editorModal/clearAll' });
   };
 
-  const handleDel = id => {
+  const handleDel = (id: any) => {
     dispatch({
       type: 'editorModal/delPointData',
       payload: { id },
@@ -94,7 +100,7 @@ const Container = props => {
   }, []);
 
   const allType = useMemo(() => {
-    let arr = [];
+    let arr: string[] = [];
     template.forEach(v => {
       arr.push(v.type);
     });
@@ -107,6 +113,13 @@ const Container = props => {
     return arr;
   }, []);
 
+  const [dragstate, setDragState] = useState({ x: 0, y: 0 });
+  const [render] = useGetBall(setDragState, {
+    innerStyle: { top: '10px', left: '10px', cursor: 'pointer' },
+    ratioSpeed: { x: 1.2, y: 1.2 },
+    intervalDelay: 5,
+  });
+
   return (
     <div className={styles.editorWrap}>
       <HeaderComponent
@@ -115,9 +128,10 @@ const Container = props => {
         pointData={pointData}
         clearData={clearData}
         location={props.location}
+        toggleCollapsed={toggleCollapsed}
       />
       <div className={styles.container}>
-        <div className={styles.list}>
+        <div className={!collapsed ? styles.list : styles.collapsed}>
           <div className={styles.searchBar}>
             <Alert
               banner
@@ -138,7 +152,7 @@ const Container = props => {
                     <TargetBox item={value} key={i} canvasId={canvasId}>
                       <DynamicEngine
                         {...value}
-                        config={schema[value.type].config}
+                        config={schema[value.type as keyof typeof schema].config}
                         componentsType="base"
                         isTpl={true}
                       />
@@ -151,7 +165,7 @@ const Container = props => {
                   <TargetBox item={value} key={i} canvasId={canvasId}>
                     <DynamicEngine
                       {...value}
-                      config={schema[value.type].config}
+                      config={schema[value.type as keyof typeof schema].config}
                       componentsType="media"
                       isTpl={true}
                     />
@@ -163,8 +177,8 @@ const Container = props => {
                   <TargetBox item={value} key={i} canvasId={canvasId}>
                     <DynamicEngine
                       {...value}
-                      config={schema[value.type].config}
-                      componentsType="visible"
+                      config={schema[value.type as keyof typeof schema].config}
+                      componentsType={'visible' as componentsType}
                       isTpl={true}
                     />
                   </TargetBox>
@@ -180,7 +194,19 @@ const Container = props => {
           <div className={styles.tickMarkLeft}>
             <Calibration direction="right" id="calibrationRight" multiple={scaleNum} />
           </div>
-          <SourceBox scaleNum={scaleNum} canvasId={canvasId} allType={allType} />
+          <SourceBox
+            dragState={dragstate}
+            setDragState={setDragState}
+            scaleNum={scaleNum}
+            canvasId={canvasId}
+            allType={allType}
+          />
+
+          <div className={styles.resetBall}>
+            <ReloadOutlined onClick={() => setDragState({ x: 0, y: 0 })} />
+          </div>
+          <div className={styles.controllBall}>{render}</div>
+
           <div className={styles.sliderWrap}>
             <span className={styles.sliderBtn} onClick={handleSlider.bind(this, 1)}>
               +
@@ -229,6 +255,6 @@ const Container = props => {
   );
 };
 
-export default connect(state => {
+export default connect((state: StateWithHistory<any>) => {
   return { pstate: state.present.editorModal };
 })(Container);

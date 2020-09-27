@@ -2192,6 +2192,13 @@
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.4.tgz#15925414e0ad2cd765bfef58842f7e26a7accb24"
   integrity sha512-1HcDas8SEj4z1Wc696tH56G8OlRaH/sqZOynNNB+HF0WOeXPaxTtbYzJY2oEfiUxjSKjhCKr+MvR7dCHcEelug==
 
+"@types/qrcode.react@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/qrcode.react/-/qrcode.react-1.0.1.tgz#0904e7a075a6274a5258f19567b4f64013c159d8"
+  integrity sha512-PcVCjpsiT2KFKfJibOgTQtkt0QQT/6GbQUp1Np/hMPhwUzMJ2DRUkR9j7tXN9Q8X06qukw+RbaJ8lJ22SBod+Q==
+  dependencies:
+    "@types/react" "*"
+
 "@types/qs@*":
   version "6.9.5"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.5.tgz#434711bdd49eb5ee69d90c1d67c354a9a8ecb18b"
@@ -2431,6 +2438,13 @@
     "@types/uglify-js" "*"
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
+
+"@types/xlsx@^0.0.36":
+  version "0.0.36"
+  resolved "https://registry.yarnpkg.com/@types/xlsx/-/xlsx-0.0.36.tgz#b5062003e5c5374ab4f08fdd3bf69da4d4013af8"
+  integrity sha512-mvfrKiKKMErQzLMF8ElYEH21qxWCZtN59pHhWGmWCWFJStYdMWjkDSAy6mGowFxHXaXZWe5/TW7pBUiWclIVOw==
+  dependencies:
+    xlsx "*"
 
 "@types/yargs-parser@*", "@types/yargs-parser@15.0.0":
   version "15.0.0"
@@ -2701,6 +2715,13 @@
     dva "^2.6.0-beta.20"
     dva-immer "^0.4.19"
     dva-loading "^3.0.20"
+
+"@umijs/plugin-esbuild@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@umijs/plugin-esbuild/-/plugin-esbuild-1.0.1.tgz#7162a31d686340bd70dfe001bfb70e7d25afa192"
+  integrity sha512-YyxO33GFzy0s6HifHOjNqLkNxxxNJDaQ4tHKmYm5jO60LZ6A65R7O/ei1+EDKanudmpwU5Y+jevvVzzYbqmV4g==
+  dependencies:
+    esbuild-webpack-plugin "^1.0.0-beta.3"
 
 "@umijs/plugin-helmet@1.1.1":
   version "1.1.1"
@@ -4939,7 +4960,14 @@ crequire@1.8.1:
   resolved "https://registry.yarnpkg.com/crequire/-/crequire-1.8.1.tgz#ac81f204786b5f201194eb1698cf441b10a4b57d"
   integrity sha1-rIHyBHhrXyARlOsWmM9EGxCktX0=
 
-cross-spawn@7.0.3, cross-spawn@^7.0.0:
+cross-env@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-7.0.2.tgz#bd5ed31339a93a3418ac4f3ca9ca3403082ae5f9"
+  integrity sha512-KZP/bMEOJEDCkDQAyRhu3RL2ZO/SUVrxQVI0G3YEQ+OLbRA3c6zgixe8Mq8a/z7+HKlNEjo8oiLUs8iRijY2Rw==
+  dependencies:
+    cross-spawn "^7.0.1"
+
+cross-spawn@7.0.3, cross-spawn@^7.0.0, cross-spawn@^7.0.1:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
   integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
@@ -5884,6 +5912,18 @@ es6-weak-map@^2.0.2:
     es5-ext "^0.10.46"
     es6-iterator "^2.0.3"
     es6-symbol "^3.1.1"
+
+esbuild-webpack-plugin@^1.0.0-beta.3:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/esbuild-webpack-plugin/-/esbuild-webpack-plugin-1.0.5.tgz#68a6a377a84c991da1a0fc302830f514c9d47472"
+  integrity sha512-X/ektio8dxHD/bYk1BhT7XZw7U1ZJDu8VRjhc81W12Mizw0Fti+Wp4W4u1e9PiMdeDz/SXAO3U0A37wV7XT0wA==
+  dependencies:
+    esbuild "^0.6.8"
+
+esbuild@^0.6.8:
+  version "0.6.34"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.6.34.tgz#76565a60e006f45d5f273b6e59e61ed0816551f5"
+  integrity sha512-InRdL/Q96pUucPqovJzvuLhquZr6jOn81FDVwFjCKz1rYKIm9OdOC+7Fs4vr6x48vKBl5LzKgtjU39BUpO636A==
 
 escalade@^3.0.2:
   version "3.1.0"
@@ -11775,6 +11815,13 @@ react-dom@^16.12.0, react-dom@^16.13.1:
     prop-types "^15.6.2"
     scheduler "^0.19.1"
 
+react-draggable-ball@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/react-draggable-ball/-/react-draggable-ball-0.1.0.tgz#c23dc28a4f3daa1fb47f7461c70a2bd8533954ef"
+  integrity sha512-ihcyqS30QJKbXP4mb9wYWDV96yF9sq6ZDo+6ntcVFpVhD64BLe6AHwQFMyt9By+pMtuutrsxzhs5fs+XsZ7U9A==
+  dependencies:
+    react-draggable "^4.4.3"
+
 react-draggable@^4.0.0, react-draggable@^4.0.3, react-draggable@^4.4.3:
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/react-draggable/-/react-draggable-4.4.3.tgz#0727f2cae5813e36b0e4962bf11b2f9ef2b406f3"
@@ -14540,7 +14587,7 @@ ws@~6.1.0:
   dependencies:
     async-limiter "~1.0.0"
 
-xlsx@^0.16.7:
+xlsx@*, xlsx@^0.16.7:
   version "0.16.7"
   resolved "https://registry.yarnpkg.com/xlsx/-/xlsx-0.16.7.tgz#62fd6590addac7c4419daaaa2b0c5388015d5f69"
   integrity sha512-Xc4NRjci2Grbh9NDk/XoaWycJurxEug1wwn0aJCmB0NvIMyQuHYq2muWLWGidYNZPf94aUbqm6K8Fbjd7gKTZg==

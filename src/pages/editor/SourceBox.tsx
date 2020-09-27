@@ -1,27 +1,43 @@
 import React, { memo, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
-import Draggable from 'react-draggable';
-import GridLayout from 'react-grid-layout';
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
+import GridLayout, { ItemCallback } from 'react-grid-layout';
 import { Tooltip } from 'antd';
 import { connect } from 'dva';
 import DynamicEngine from 'components/DynamicEngine';
 import styles from './index.less';
 import { uuid } from '@/utils/tool';
+import { Dispatch } from 'umi';
+import { StateWithHistory } from 'redux-undo';
+interface SourceBoxProps {
+  pstate: { pointData: { id: string; item: any; point: any }[] };
+  scaleNum: number;
+  canvasId: string;
+  allType: string[];
+  dispatch: Dispatch;
+  dragState: { x: number; y: number };
+  setDragState: React.Dispatch<
+    React.SetStateAction<{
+      x: number;
+      y: number;
+    }>
+  >;
+}
 
-const SourceBox = memo(props => {
-  const { pstate, scaleNum, canvasId, allType, dispatch } = props;
+const SourceBox = memo((props: SourceBoxProps) => {
+  const { pstate, scaleNum, canvasId, allType, dispatch, dragState, setDragState } = props;
 
-  const pointData = pstate ? pstate.pointData : {};
-  const [canvasRect, setCanvasRect] = useState([]);
+  const pointData = pstate ? pstate.pointData : [];
+  const [canvasRect, setCanvasRect] = useState<number[]>([]);
   const [isShowTip, setIsShowTip] = useState(true);
   const [{ isOver }, drop] = useDrop({
     accept: allType,
-    drop: (item, monitor) => {
+    drop: (item: { h: number; type: string }, monitor) => {
       let parentDiv = document.getElementById(canvasId),
-        pointRect = parentDiv.getBoundingClientRect(),
+        pointRect = parentDiv!.getBoundingClientRect(),
         top = pointRect.top,
         pointEnd = monitor.getSourceClientOffset(),
-        y = pointEnd.y < top ? 0 : pointEnd.y - top,
+        y = pointEnd!.y < top ? 0 : pointEnd!.y - top,
         col = 24, // 网格列数
         cellHeight = 2,
         w = item.type === 'Icon' ? 3 : col;
@@ -43,7 +59,7 @@ const SourceBox = memo(props => {
     }),
   });
 
-  const dragStop = (layout, oldItem, newItem, placeholder, e, element) => {
+  const dragStop: ItemCallback = (layout, oldItem, newItem, placeholder, e, element) => {
     const curPointData = pointData.filter(item => item.id === newItem.i)[0];
     dispatch({
       type: 'editorModal/modPointData',
@@ -51,7 +67,7 @@ const SourceBox = memo(props => {
     });
   };
 
-  const onDragStart = (layout, oldItem, newItem, placeholder, e, element) => {
+  const onDragStart: ItemCallback = (layout, oldItem, newItem, placeholder, e, element) => {
     const curPointData = pointData.filter(item => item.id === newItem.i)[0];
     dispatch({
       type: 'editorModal/modPointData',
@@ -59,7 +75,7 @@ const SourceBox = memo(props => {
     });
   };
 
-  const onResizeStop = (layout, oldItem, newItem, placeholder, e, element) => {
+  const onResizeStop: ItemCallback = (layout, oldItem, newItem, placeholder, e, element) => {
     const curPointData = pointData.filter(item => item.id === newItem.i)[0];
     dispatch({
       type: 'editorModal/modPointData',
@@ -68,7 +84,7 @@ const SourceBox = memo(props => {
   };
 
   useEffect(() => {
-    let { width, height } = document.getElementById(canvasId).getBoundingClientRect();
+    let { width, height } = document.getElementById(canvasId)!.getBoundingClientRect();
     setCanvasRect([width, height]);
   }, [canvasId]);
 
@@ -81,9 +97,16 @@ const SourceBox = memo(props => {
     };
   }, []);
   const opacity = isOver ? 0.7 : 1;
-  const backgroundColor = isOver ? 1 : 0.7;
+  // const backgroundColor = isOver ? 1 : 0.7;
+
   return (
-    <Draggable handle=".js_box">
+    <Draggable
+      position={dragState}
+      handle=".js_box"
+      onStop={(e: DraggableEvent, data: DraggableData) => {
+        setDragState({ x: data.x, y: data.y });
+      }}
+    >
       <div className={styles.canvasBox}>
         <div
           style={{
@@ -98,7 +121,6 @@ const SourceBox = memo(props => {
             className={styles.canvas}
             style={{
               opacity,
-              backgroundColor,
             }}
             ref={drop}
           >
@@ -144,4 +166,6 @@ const SourceBox = memo(props => {
   );
 });
 
-export default connect(state => ({ pstate: state.present.editorModal }))(SourceBox);
+export default connect((state: StateWithHistory<any>) => ({ pstate: state.present.editorModal }))(
+  SourceBox,
+);
